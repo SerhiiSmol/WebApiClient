@@ -12,29 +12,12 @@ namespace WebApiClient
 {
     class Program
     {
-        private static readonly HttpClient client = new HttpClient();
         public static async Task Main(string[] args)
         {
-            await ProcessRepositories();
+            Client client = new Client("https://tester.consimple.pro");
+            (List<Products> products,List<Categories> categories) = await client.GetProductsAndCategories();
+            client.PrintProductsAndCategories(products, categories);
         }
-        private static async Task ProcessRepositories()
-        {
-            client.DefaultRequestHeaders.Accept.Clear();
-
-            client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
-
-
-            var stringTask = await client.GetStringAsync("https://tester.consimple.pro");
-
-            var prods = JsonConvert.DeserializeObject<Dictionary<string, List<Products>>>(stringTask).Where(x => x.Key == "Products").SelectMany(x=>x.Value).ToList();
-            var cats = JsonConvert.DeserializeObject<Dictionary<string, List<Categories>>>(stringTask).Where(x => x.Key == "Categories").SelectMany(x=>x.Value).ToList();
-
-            foreach (var item in prods)
-            {
-                Console.WriteLine($"{item.name} {(from c in cats where c.id == item.categoryId select c.name).First()}");
-            }
-
-         
-        }
+        
     }
 }
